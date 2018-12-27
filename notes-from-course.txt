@@ -1,0 +1,984 @@
+//////////////////////////////////////////////////////////////////
+S: 6; P: 51; 'Mocha and basic testing'
+//////////////////////////////////////////////////////////////////
+
+Create your first test cases to test code working as expected and verify a function does what we expect it to do.
+	Example: If we have f(x) to add 2 num together we can auto verify it is doing that
+	Example: If we have f(x) to supposed to fetch user from database we can ensure doing that as well
+
+Basics of setting up a testing suite inside of a node.js project.
+
+$ mkdir [project]
+$ npm init (defaults)
+create utils folder with utils.js file
+
+	// basic function that takes 2 numbers and adds them together
+
+	// module.exports.add = (a, b) => {
+	// 	return a + b;
+	// };
+
+	// arrow function expression syntax
+	module.exports.add = (a, b) => a + b ;
+
+https://mochajs.org/
+
+$ npm i mocha --save-dev (install module but only need locally)
+
+when you only need a dependency locally it is helpful to use --save-dev so it doesn't get added to heroku and lowers the time to boot up
+
+
+
+package.json
+
+change this default:
+	"scripts": {
+	    "test": "echo \"Error: no test specified\" && exit 1"
+	  },
+
+...to this (configure test script)
+// can use 'globbing pattern' to specify multiple files
+  "scripts": {
+    "test": "mocha **/Utils.test.js"
+  },
+...actually even better is this:
+
+  "scripts": {
+    "test": "mocha **/*.test.js"
+  },
+
+... looks for any file ending in 'test.js'
+
+
+NOW 
+
+$ npm test
+
+  ✓ should add two numbers
+
+  1 passing (4ms)
+
+
+
+
+const utils = require('./utils');
+
+// function that runs code and if go well test passed else test fails
+it('should add two numbers', () => {
+	var res = utils.add(33, 11);
+	// to make test fail you have to:
+	// throw a new error
+	throw new Error('Value not correct'); 
+	/* pass into constructor function
+	the text we wanna include
+	in the error thrown */
+}); // define test case with 2 arguments
+//bdd behavior driven development
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 6; P: 52; 'Watch and auto restart tests'
+//////////////////////////////////////////////////////////////////
+
+normal:
+nodemon app.js (whenever any code in our app changes it would re-run the app.js file as a node application)
+
+specify any command in the world when our files change"
+use the --exec flag (specify command to run and might not be a node file)
+
+EXAMPLE
+
+nodemon --exec 'npm test'
+nodemon --exec 'npm test'
+
+
+
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha **/*.test.js",
+    "test-watch" : "nodemon --exec \"npm test\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  }
+}
+
+
+
+"test-watch" : "nodemon --exec \"npm test\""
+cross-OS compatibility (windows machines do not support double quotes)
+
+
+
+to run it from Terminal:
+
+$ npm run test-watch
+
+starts up test-watch script
+starts nodemon
+every time a file in app changes the tests will print status to screen/console/Terminal
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 6; P: 53; 'Using an assertion library'
+//////////////////////////////////////////////////////////////////
+
+assertion library = lets us make assertions about values whether the type, the value, whether an array contains an element etc
+
+mjackson expect
+https://github.com/mjackson/expect
+
+example
+https://github.com/mjackson/expect#toexist
+	toExist
+	expect(object).toExist([message])
+
+	Asserts the given object is truthy.
+
+	expect('something truthy').toExist()
+
+
+LIKE MOCHA save as a DEV dependency
+npm install expect@1.20.2 --save-dev
+
+
+
+BEFORE 
+
+~/utils/utils.test.js
+
+	const expect = require('expect');
+
+	const utils = require('./utils');
+
+	// function that runs code and if go well test passed else test fails
+	it('should add two numbers', () => {
+		var res = utils.add(33, 11);
+		// to make test fail you have to:
+		
+		// throw a new error
+		// throw new Error('Value not correct'); 
+		/* pass into constructor function
+		the text we wanna include
+		in the error thrown */
+
+		if (res !== 44) {
+			throw new Error(`Expected 44, but got ${res}.`);
+		}
+	}); // define test case with 2 arguments
+	//bdd behavior driven development
+
+	it('should square a number', () => {
+		var res = utils.square(4);
+		if (res !== 16) {
+			throw new Error(`Expected 16, but got ${res}.`);
+		}
+	})
+
+AFTER
+
+~/utils/utils.test.js
+
+
+	const expect = require('expect');
+
+	const utils = require('./utils');
+
+	it('should add two numbers', () => {
+		var res = utils.add(33, 11);
+		expect(res).toBe(44).toBeA('number');
+		// if (res !== 44) {
+		// 	throw new Error(`Expected 44, but got ${res}.`);
+		// }
+	});
+
+	it('should square a number', () => {
+		var res = utils.square(4);
+		expect(res).toBe(16).toBeA('number');
+		// if (res !== 16) {
+		// 	throw new Error(`Expected 16, but got ${res}.`);
+		// }
+	})
+
+
+
+AFTER AFTER
+
+~/utils/utils.test.js
+
+		// assertion library for our test suite
+		const expect = require('expect');
+
+		const utils = require('./utils');
+
+		it('should add two numbers', () => {
+			var res = utils.add(33, 11);
+			expect(res).toBe(44).toBeA('number');
+			// if (res !== 44) {
+			// 	throw new Error(`Expected 44, but got ${res}.`);
+			// }
+		});
+
+		it('should square a number', () => {
+			var res = utils.square(3);
+			expect(res).toBe(9).toBeA('number');
+			// if (res !== 16) {
+			// 	throw new Error(`Expected 16, but got ${res}.`);
+			// }
+		});
+
+		// should verify first and last names are set
+		it('should set firstName and lastName', () => {
+			// assert it includes firstName and lastName with proper values
+			var user = {location: 'San Francisco', age: 32};
+			var res = utils.setName(user, 'Jeremiah Currier');
+			/* Now if you know a lot about JavaScript you might
+			that objects are passed by reference so the user variable
+			has actually been updated as well. That is expected
+			and both user and res will have exact same value.
+			See proof using an assertion.*/
+			// expect(user).toEqual(res);
+
+			expect(res).toInclude({
+				firstName: 'Jeremiah',
+				lastName: 'Currier'
+			});
+
+		});
+
+		// it('should expect some values', () => {
+		// 	// expect(12).toNotBe(12);
+			
+		// 	// expect({name: 'Andrew'}).toBe({name: 'Andrew'});
+			
+		// 	// objects are trying to see if EXACT SAME object but they are not...
+		// 	// expect({name: 'Andrew'}).toEqual({name: 'Andrew'});
+		// 	// expect({name: 'andrew'}).toNotEqual({name: 'Andrew'});
+		// 	// expect([2,3,4]).toInclude(2);
+		// 	// expect([2,3,4]).toExclude(5);
+		// 	expect({
+		// 		name: 'Jeremiah',
+		// 		age: 32,
+		// 		location: 'San Francisco'
+		// 	}).toInclude({
+		// 		age: 32
+		// 	})
+		// });
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 6; P: 54; 'Testing asynchronous code'
+//////////////////////////////////////////////////////////////////
+
+
+
+utils.js
+
+
+	// basic function that takes 2 numbers and adds them together
+
+	// module.exports.add = (a, b) => {
+	// 	return a + b;
+	// };
+
+	// arrow function expression syntax
+	module.exports.add = (a, b) => a + b;
+
+	/* ASYNCHRONOUS call - fake - simulated via setTimeout() delay 
+	will have a callback to simulate delay
+	in real world this might be a DATABASE request or an
+	HTTP request
+	*/
+
+	module.exports.asyncAdd = (a, b, callback) => {
+		setTimeout((), => {
+			callback(a + b);
+		}, 1000); /* 1 second (if tests longer than 2 seconds mocha assumes
+		that is not what you wanted so it will fail) */
+	};
+
+	module.exports.square = (x) => x * x;
+
+	module.exports.setName = (user, fullName) => {
+		var names = fullName.split(' ');
+		user.firstName = names[0];
+		user.lastName = names[1];
+		return user;
+	};
+
+
+
+
+
+
+utils.test.js
+
+
+
+	// assertion library for our test suite
+	const expect = require('expect');
+
+	const utils = require('./utils');
+
+	it('should add two numbers', () => {
+		var res = utils.add(33, 11);
+		expect(res).toBe(44).toBeA('number');
+		// if (res !== 44) {
+		// 	throw new Error(`Expected 44, but got ${res}.`);
+		// }
+	});
+
+	it('should square a number', () => {
+		var res = utils.square(3);
+		expect(res).toBe(9).toBeA('number');
+		// if (res !== 16) {
+		// 	throw new Error(`Expected 16, but got ${res}.`);
+		// }
+	});
+
+	// should verify first and last names are set
+	it('should set firstName and lastName', () => {
+		// assert it includes firstName and lastName with proper values
+		var user = {location: 'San Francisco', age: 32};
+		var res = utils.setName(user, 'Jeremiah Currier');
+		/* Now if you know a lot about JavaScript you might
+		that objects are passed by reference so the user variable
+		has actually been updated as well. That is expected
+		and both user and res will have exact same value.
+		See proof using an assertion.*/
+		// expect(user).toEqual(res);
+
+		expect(res).toInclude({
+			firstName: 'Jeremiah',
+			lastName: 'Currier'
+		});
+
+	});
+
+	// it('should expect some values', () => {
+	// 	// expect(12).toNotBe(12);
+		
+	// 	// expect({name: 'Andrew'}).toBe({name: 'Andrew'});
+		
+	// 	// objects are trying to see if EXACT SAME object but they are not...
+	// 	// expect({name: 'Andrew'}).toEqual({name: 'Andrew'});
+	// 	// expect({name: 'andrew'}).toNotEqual({name: 'Andrew'});
+	// 	// expect([2,3,4]).toInclude(2);
+	// 	// expect([2,3,4]).toExclude(5);
+	// 	expect({
+	// 		name: 'Jeremiah',
+	// 		age: 32,
+	// 		location: 'San Francisco'
+	// 	}).toInclude({
+	// 		age: 32
+	// 	})
+	// });
+
+
+
+
+
+
+
+======= utils.js ======= 
+
+	module.exports.add = (a, b) => a + b;
+
+	/* ASYNCHRONOUS call - fake - simulated via setTimeout() delay 
+	will have a callback to simulate delay
+	in real world this might be a DATABASE request or an
+	HTTP request
+	*/
+
+	module.exports.asyncAdd = (a, b, callback) => {
+		setTimeout(() => {
+			callback(a + b);
+		}, 1000);
+		/* 1 second (if tests longer than 2 seconds mocha assumes
+		that is not what you wanted so it will fail) */
+	};
+
+	module.exports.square = (x) => x * x;
+
+	module.exports.asyncSquare = (x, callback) => {
+		setTimeout(() => {
+			callback(x * x);
+		}, 1000);
+		/* 1 second (if tests longer than 2 seconds mocha assumes
+		that is not what you wanted so it will fail) */
+	};
+
+	module.exports.setName = (user, fullName) => {
+		var names = fullName.split(' ');
+		user.firstName = names[0];
+		user.lastName = names[1];
+		return user;
+	};
+
+
+
+======= utils.test.js  ======= 
+
+	// assertion library for our test suite
+	const expect = require('expect');
+
+	const utils = require('./utils');
+
+	it('should add two numbers', () => {
+		var res = utils.add(33, 11);
+		expect(res).toBe(44).toBeA('number');
+	});
+
+	it('should async add two numbers', (done) => {
+		utils.asyncAdd(4, 3, (sum) => {
+			// // should be called with the value 7
+			// // expect(sum).toBe(10).toBeA('number'); // this works, why? async
+			// // the above runs before the callback in the async is fired
+			// // i mean the second arg to 'it' the cb function in this 
+			// // function
+			// // mocha thinks your test is done ... 
+			// // the assertion above never runs
+			// // how do we tell mocha to wait?
+			// // include arg inside of () => like this (arg) =>
+			// // 'done' lets mocha know includes async so call .done after
+			// // assertions
+			// done(); // now assertions matter!
+			expect(sum).toBe(7).toBeA('number');
+			done();
+			// a DB call or API call should take 'nowhere near' a second
+		})
+	});
+
+	it('should square a number', () => {
+		var res = utils.square(3);
+		expect(res).toBe(9).toBeA('number');
+	});
+
+	it('should async square a number', (done) => {
+		utils.asyncSquare(3, (square) => {
+			expect(square).toBe(9).toBeA('number');
+			done();
+			/* if you see 'Error timeout of 
+			2000 ms exceeded' either you have an async fx
+			whose callback is not firing OR
+			you forgot to call done() or maybe a typo */
+		})
+	});
+
+	// should verify first and last names are set
+	it('should set firstName and lastName', () => {
+		var user = {location: 'San Francisco', age: 32};
+		var res = utils.setName(user, 'Jeremiah Currier');
+		expect(res).toInclude({
+			firstName: 'Jeremiah',
+			lastName: 'Currier'
+		});
+
+	});
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 6; P: 55; 'Testing express.js apps PART 1'
+//////////////////////////////////////////////////////////////////
+
+
+$ npm i express --save (as opposed to a dev dependencies)
+
+server/server.js
+
+	/* actual code that starts up our server
+	define our routes
+	listen to a port */
+
+	const express = require('express');
+
+	var app = express();
+
+	// configure our routes
+
+	app.get('/', (req, res) => { // HTTP GET handler
+		res.send('Hello world!');
+	});
+
+	// listen to a port bind to port 3000
+	app.listen(3000);
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 6; P: 56; 'Testing express.js apps PART 2'
+//////////////////////////////////////////////////////////////////
+
+
+HISTORY
+
+Testing HTTP apps used to be hard:
+	fire up server > code to actually make the request to the appropriate URL > dig through the response getting what you want and then making some assertions about it - whether that's headers, status code, etc
+
+These days = LIBRARY!
+
+'supertest'
+
+created by developers who originally created express.js with built in support for express
+
+make call to 'request' method provided by 'supertest' which you pass in our express app as the argument - NO NEED to manually check (1) headers or (2) status code or (3) body
+
+	const request = require('supertest');
+	const express = require('express');
+
+	const app = express();
+
+	app.get('/user', function(req, res) {
+	  res.status(200).json({ name: 'john' });
+	});
+
+	request(app)
+	  .get('/user')
+	  .expect('Content-Type', /json/)
+	  .expect('Content-Length', '15')
+	  .expect(200)
+	  .end(function(err, res) {
+	    if (err) throw err;
+	  });
+
+
+
+
+
+
+
+server.test.js
+
+		const request = require('supertest');
+		const expect = require('expect');
+
+		var app = require('./server').app;
+
+		/* test that verifies that when
+		we make an HTTP test we get Hello World
+		response. */
+
+		it('should return hello world response', (done) => {
+			request(app)
+				.get('/')
+				// .expect(200) // status code assertion
+				.expect(404) // status code assertion
+				// .expect('Hello world!') // res body we assert
+				// pass a function to expect
+				.expect((res) => {
+					// foo
+					// supertest only supports '=' assertion
+					//expect module supports all
+					expect(res.body).toInclude({
+						// subset of props on obj
+						error: 'Page not found.'
+					});
+				})
+				.end(done); // no need to manually call done
+		});
+
+
+
+		// Make a new test
+		// assert 200
+		// Assert that you exist in users array
+
+		// // ATTEMPT
+
+		// it('should return you in users array', (done) => {
+		// 	request(app)
+		// 		.get('/users')
+		// 		.expect(200)
+		// 		.expect((res) => {
+		// 			expect(res.body).toInclude([
+		// 			{
+		// 				name: 'Jeremiah Currier',
+		// 				age: 32
+		// 			}]);
+		// 		})
+		// 		.end(done);
+		// });
+
+		// solution
+
+		it('should return my user object', (done) => {
+			request(app)
+				.get('/users')
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toInclude({
+						name: 'Jeremiah Currier',
+						age: 32
+					});
+				})
+				.end(done);
+		});
+
+
+
+
+
+
+server.js
+
+		/* actual code that starts up our server
+		define our routes
+		listen to a port */
+
+		const express = require('express');
+
+		var app = express();
+
+		// configure our routes
+
+		app.get('/', (req, res) => { // HTTP GET handler
+			// res.send('Hello world!');
+			res.status(404).send({
+				error: 'Page not found.',
+				name: 'Todo App v1.0'
+			});
+		});
+
+
+		// GET /users
+		// Give users a name prop and age prop
+		// make a couple users
+
+		// // ATTEMPT
+		// app.get('/users', (req, res) => {
+		// 	res.status(200).send([
+		// 		{
+		// 			name: 'Jeremiah Currier',
+		// 			age: 32
+		// 		},
+		// 		{
+		// 			name: 'Bob Ross',
+		// 			age: 100
+		// 		}
+		// 	]);
+		// });
+
+		// solution
+		app.get('/users', (req, res) => {
+			res.send([{
+				name: 'Mike',
+				age: 27
+			},
+			{
+				name: 'Jeremiah Currier',
+				age: 32
+			}]);
+		});
+
+
+
+
+
+
+		// // listen to a port bind to port 3000
+		// app.listen(3000);
+
+		/*  This has to do with that I'm starting
+		an app twice, when under test.
+		And not closing both. The solution is simple: 
+		just start listening when you are 
+		not running under test. A simple way 
+		to do that is by checking for a 
+		module parent in your application */
+		if(!module.parent) {
+		   app.listen(3000);
+		}
+
+		module.exports.app = app;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 6; P: 57; 'Organizing Test With describe()'
+//////////////////////////////////////////////////////////////////
+
+group tests together
+
+
+server.test.js
+
+	const request = require('supertest');
+	const expect = require('expect');
+
+	var app = require('./server').app;
+
+	// server - root desc block
+		// GET /
+			// some test case
+		// GET /users
+			// some test case
+
+	describe('Server', () => {
+		describe('GET /', () => {
+			it('should return hello world response', (done) => {
+				request(app)
+					.get('/')
+					.expect(404)
+					.expect((res) => {
+						expect(res.body).toInclude({
+							error: 'Page not found.'
+						});
+					})
+					.end(done);
+			});
+		});
+		describe('GET /users', () => {
+			it('should return my user object', (done) => {
+				request(app)
+					.get('/users')
+					.expect(200)
+					.expect((res) => {
+						expect(res.body).toInclude({
+							name: 'Jeremiah Currier',
+							age: 32
+						});
+					})
+					.end(done);
+			});
+		});
+	});
+
+
+
+
+utils.test.js
+
+		const expect = require('expect');
+
+		const utils = require('./utils');
+
+		describe('Utils', () => {
+
+			describe('#add', () => {
+				it('should add two numbers', () => {
+					var res = utils.add(33, 11);
+					expect(res).toBe(44).toBeA('number');
+				});
+
+				it('should async add two numbers', (done) => {
+					utils.asyncAdd(4, 3, (sum) => {
+						expect(sum).toBe(7).toBeA('number');
+						done();
+					})
+				});
+			});
+
+			describe('#square', () => {
+				it('should square a number', () => {
+					var res = utils.square(3);
+					expect(res).toBe(9).toBeA('number');
+				});
+
+				it('should async square a number', (done) => {
+					utils.asyncSquare(3, (square) => {
+						expect(square).toBe(9).toBeA('number');
+						done();
+					})
+				});
+			})
+		});
+
+		it('should set firstName and lastName', () => {
+			var user = {location: 'San Francisco', age: 32};
+			var res = utils.setName(user, 'Jeremiah Currier');
+			expect(res).toInclude({
+				firstName: 'Jeremiah',
+				lastName: 'Currier'
+			});
+
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 6; P: 58; 'Test Spies'
+//////////////////////////////////////////////////////////////////
+
+spies
+	app.js
+	app.test.js
+	db.js
+
+app.js
+
+			var db = require('./db.js');
+
+			module.exports.handleSignup = (email, password) => {
+				// check if email already exists
+
+				// save the user to the database
+					// db.saveUser(user);
+					// db.saveUser({
+					// 	email: email,
+					// 	password: password
+					// 	// in es6 if property name = variable name
+					// 	// no need for both
+					// });
+				db.saveUser({ email, password});
+				
+				// send the welcome email
+			};
+
+app.test.js
+
+		const expect = require('expect');
+		/* 'rewire' (great for testing functions
+		that have side effects) - 
+		lets us swap out variables for
+		our tests. in our case in our test file
+		we can replace our 'db' object with 
+		something else completely. Then when
+		the code run instead of running db.saveUser
+		it will call a spy version of the function
+		*/
+		const rewire = require('rewire');
+
+		/* loads your file through require
+		+ adds 2 new methods (get set)
+		onto your app */
+		var app = rewire('./app');
+		// app.__set__ 
+		// app.__get__
+
+		// make simulation of db object
+
+		describe('App', () => {
+			var db = {
+				saveUser: expect.createSpy()
+			};
+			app.__set__('db', db);
+
+			// add individual test cases
+			it('should call the spy correctly', () => {
+				// creating a spy
+				var spy = expect.createSpy();
+				// spy();
+				// assert our spy was called
+				// expect(spy).toHaveBeenCalled();
+					//   create series of assertions
+					// https://github.com/mjackson/expect#spy-tohavebeencalled
+				spy('Jeremiah', 32);
+				expect(spy).toHaveBeenCalledWith('Jeremiah', 32);
+			});
+
+			it('should call saveUser with user object', () => {
+				// synchronous test for now
+				var email = 'jeremiah@example.com';
+				var password = '123abc';
+
+				// call handleSignup()
+				app.handleSignup(email, password);
+				expect(db.saveUser).toHaveBeenCalledWith({email, password});
+			});
+
+		});
+
+
+db.js
+
+		module.exports.saveUser = (user) => {
+			console.log('Saving the user', user);
+		}
+
+
+
+
+
+
+
+
+
+
